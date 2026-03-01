@@ -1,12 +1,2 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/ingest",
-      "schedule": "0,30 * * * *"
-    },
-    {
-      "path": "/api/cron/enrich",
-      "schedule": "10,40 * * * *"
-    }
-  ]
 }
