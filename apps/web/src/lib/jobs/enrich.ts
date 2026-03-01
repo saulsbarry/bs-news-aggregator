@@ -24,6 +24,7 @@ export async function runEnrichment(): Promise<EnrichResult> {
     LEFT JOIN article_embeddings ae ON ae.article_id = a.id
     WHERE ae.article_id IS NULL
       AND a.is_visible = TRUE
+      AND a.published_at >= NOW() - INTERVAL '24 hours'
     ORDER BY a.published_at DESC
     LIMIT $1
   `,
