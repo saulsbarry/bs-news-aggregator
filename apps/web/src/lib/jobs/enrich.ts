@@ -1,7 +1,7 @@
 import { getDb } from "../pg";
 import { summarize, embed } from "../ai/client";
 
-const ENRICH_BATCH_SIZE = 10;
+const ENRICH_BATCH_SIZE = 50;
 const EMBEDDING_MODEL_NAME = "text-embedding-3-small";
 
 export interface EnrichResult {
