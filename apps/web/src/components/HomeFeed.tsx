@@ -6,6 +6,7 @@ import type { RankedCluster } from "../lib/feed";
 import type { SourceItem } from "../lib/sources";
 import { CANONICAL_TOPICS } from "../lib/constants";
 import { MultiSelect } from "./MultiSelect";
+import { SkeletonCard } from "./SkeletonCard";
 
 const PAGE_SIZE = 20;
 
@@ -224,11 +225,18 @@ export function HomeFeed({ initialClusters, sources }: Props) {
         ))}
       </ul>
 
+      {loading && (
+        <ul className="space-y-4">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </ul>
+      )}
+
       <div
         ref={sentinelRef}
         className="py-4 text-center text-sm text-slate-500 dark:text-slate-400"
       >
-        {loading && "Loading…"}
         {!loading && !hasMore && clusters.length > 0 && "You're all caught up."}
       </div>
     </div>

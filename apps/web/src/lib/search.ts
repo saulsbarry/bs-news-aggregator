@@ -1,4 +1,5 @@
 import { getDb } from "./pg";
+import { cacheGet, cacheSet } from "./cache";
 
 export interface SearchFilters {
   topic?: string;
@@ -28,6 +29,16 @@ export async function searchArticles(
   filters: SearchFilters,
   limit: number
 ): Promise<SearchResult> {
+  const trimmed = q.trim();
+  const cacheKey = trimmed
+    ? `search:v1:${encodeURIComponent(trimmed)}:${filters.topic ?? ""}:${filters.sourceId ?? ""}:${filters.timeRange ?? ""}:${limit}`
+    : null;
+
+  if (cacheKey) {
+    const cached = await cacheGet<SearchResult>(cacheKey);
+    if (cached) return cached;
+  }
+
   const db = await getDb();
 
   const intervalMap: Record<NonNullable<SearchFilters["timeRange"]>, string> = {
@@ -130,7 +141,7 @@ export async function searchArticles(
     params
   );
 
-  return {
+  const result: SearchResult = {
     hits: rows.rows.map((r: HitRow) => ({
       id: r.id,
       title: r.title,
@@ -144,4 +155,7 @@ export async function searchArticles(
       clusterTitle: r.cluster_title
     }))
   };
+
+  if (cacheKey) await cacheSet(cacheKey, result, 30);
+  return result;
 }
