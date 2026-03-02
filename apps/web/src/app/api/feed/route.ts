@@ -5,7 +5,7 @@ import { z } from "zod";
 const querySchema = z.object({
   limit: z.coerce.number().min(1).max(100).default(20),
   offset: z.coerce.number().min(0).default(0),
-  timeRange: z.enum(["24h", "48h", "7d"]).optional()
+  timeRange: z.enum(["6h", "12h", "24h", "48h", "7d"]).optional()
 });
 
 export async function GET(request: Request) {

@@ -18,7 +18,7 @@ export interface RankedFeed {
 export interface FeedFilters {
   topics?: string[];
   sourceIds?: string[];
-  timeRange?: "24h" | "48h" | "7d";
+  timeRange?: "6h" | "12h" | "24h" | "48h" | "7d";
 }
 
 export async function getRankedFeed(
@@ -30,13 +30,17 @@ export async function getRankedFeed(
   const db = await getDb();
 
   const since =
-    opts.timeRange === "24h"
-      ? new Date(Date.now() - 24 * 60 * 60 * 1000)
-      : opts.timeRange === "48h"
-        ? new Date(Date.now() - 48 * 60 * 60 * 1000)
-        : opts.timeRange === "7d"
-          ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          : null;
+    opts.timeRange === "6h"
+      ? new Date(Date.now() - 6 * 60 * 60 * 1000)
+      : opts.timeRange === "12h"
+        ? new Date(Date.now() - 12 * 60 * 60 * 1000)
+        : opts.timeRange === "24h"
+          ? new Date(Date.now() - 24 * 60 * 60 * 1000)
+          : opts.timeRange === "48h"
+            ? new Date(Date.now() - 48 * 60 * 60 * 1000)
+            : opts.timeRange === "7d"
+              ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+              : null;
 
   const params: unknown[] = [];
   let paramIndex = 0;

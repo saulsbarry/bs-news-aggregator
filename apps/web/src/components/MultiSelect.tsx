@@ -16,17 +16,31 @@ interface Props {
 
 export function MultiSelect({ options, selected, onChange, placeholder }: Props) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const allCheckboxRef = useRef<HTMLInputElement>(null);
+
+  const allSelected = options.length > 0 && selected.length === options.length;
+  const someSelected = selected.length > 0 && selected.length < options.length;
+
+  useEffect(() => {
+    if (allCheckboxRef.current) {
+      allCheckboxRef.current.indeterminate = someSelected;
+    }
+  }, [someSelected]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  function toggleAll() {
+    onChange(allSelected ? [] : options.map((o) => o.value));
+  }
 
   function toggle(value: string) {
     onChange(
@@ -37,7 +51,7 @@ export function MultiSelect({ options, selected, onChange, placeholder }: Props)
   }
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={containerRef} className="relative">
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
@@ -64,13 +78,19 @@ export function MultiSelect({ options, selected, onChange, placeholder }: Props)
           {options.length === 0 && (
             <p className="px-3 py-2 text-sm text-slate-500">No options available</p>
           )}
-          {selected.length > 0 && (
-            <button
-              onClick={() => onChange([])}
-              className="w-full text-left px-3 py-1.5 text-xs text-blue-600 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-            >
-              Clear selection
-            </button>
+          {options.length > 0 && (
+            <label className="flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer border-b border-slate-100 dark:border-slate-800">
+              <input
+                ref={allCheckboxRef}
+                type="checkbox"
+                checked={allSelected}
+                onChange={toggleAll}
+                className="rounded border-slate-300 dark:border-slate-600 text-blue-600"
+              />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                All
+              </span>
+            </label>
           )}
           {options.map((opt) => (
             <label

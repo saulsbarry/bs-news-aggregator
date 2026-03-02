@@ -1,15 +1,13 @@
 import { getRankedFeed } from "../lib/feed";
 import { getSources } from "../lib/sources";
-import { getTopics } from "../lib/topics";
 import { HomeFeed } from "../components/HomeFeed";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [feed, sources, topics] = await Promise.all([
+  const [feed, sources] = await Promise.all([
     getRankedFeed({ limit: 20, offset: 0 }),
     getSources(),
-    getTopics(),
   ]);
 
   return (
@@ -22,7 +20,7 @@ export default async function HomePage() {
         </p>
       </section>
 
-      {feed.clusters.length === 0 && topics.length === 0 ? (
+      {feed.clusters.length === 0 ? (
         <p className="text-sm text-slate-500 dark:text-slate-400">
           No stories yet. Once ingestion is configured and running, fresh stories
           will appear here.
@@ -31,7 +29,6 @@ export default async function HomePage() {
         <HomeFeed
           initialClusters={feed.clusters}
           sources={sources.filter((s) => s.isActive)}
-          topics={topics}
         />
       )}
     </div>

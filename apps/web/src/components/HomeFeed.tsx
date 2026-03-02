@@ -4,12 +4,15 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RankedCluster } from "../lib/feed";
 import type { SourceItem } from "../lib/sources";
+import { CANONICAL_TOPICS } from "../lib/constants";
 import { MultiSelect } from "./MultiSelect";
 
 const PAGE_SIZE = 20;
 
 const TIME_RANGES = [
-  { value: "", label: "All time" },
+  { value: "", label: "All" },
+  { value: "6h", label: "6h" },
+  { value: "12h", label: "12h" },
   { value: "24h", label: "24h" },
   { value: "48h", label: "48h" },
   { value: "7d", label: "7d" },
@@ -18,10 +21,9 @@ const TIME_RANGES = [
 interface Props {
   initialClusters: RankedCluster[];
   sources: SourceItem[];
-  topics: string[];
 }
 
-export function HomeFeed({ initialClusters, sources, topics }: Props) {
+export function HomeFeed({ initialClusters, sources }: Props) {
   const [clusters, setClusters] = useState(initialClusters);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialClusters.length === PAGE_SIZE);
@@ -130,7 +132,7 @@ export function HomeFeed({ initialClusters, sources, topics }: Props) {
   }, [selectedTopics, selectedSourceIds, timeRange]);
 
   const sourceOptions = sources.map((s) => ({ value: s.id, label: s.name }));
-  const topicOptions = topics.map((t) => ({ value: t, label: t }));
+  const topicOptions = CANONICAL_TOPICS.map((t) => ({ value: t, label: t }));
   const hasActiveFilters =
     selectedTopics.length > 0 || selectedSourceIds.length > 0 || timeRange !== "";
 
@@ -150,15 +152,15 @@ export function HomeFeed({ initialClusters, sources, topics }: Props) {
           onChange={setSelectedSourceIds}
           placeholder="Sources"
         />
-        <div className="flex items-center rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden text-sm">
+        <div className="flex flex-wrap items-center gap-1">
           {TIME_RANGES.map((tr) => (
             <button
               key={tr.value}
               onClick={() => setTimeRange(tr.value)}
-              className={`px-3 py-1.5 transition ${
+              className={`px-3 py-1.5 rounded-lg border text-sm transition ${
                 timeRange === tr.value
-                  ? "bg-blue-600 text-white"
-                  : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  ? "bg-blue-600 border-blue-600 text-white"
+                  : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
               }`}
             >
               {tr.label}

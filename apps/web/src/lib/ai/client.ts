@@ -27,7 +27,7 @@ export async function summarize(text: string): Promise<SummarizeResult | null> {
         {
           role: "system",
           content:
-            "Summarize the following news article in 2-4 concise sentences. Then list 1-5 topic keywords on a single line, comma-separated. Reply with exactly two lines: line 1 = summary, line 2 = topics."
+            "Summarize the following news article in 2-4 concise sentences. Then classify it into exactly ONE of these categories: Business, Entertainment, Health, Politics, Science, Sports, Technology, World. Reply with exactly two lines: line 1 = summary, line 2 = category (single word from the list above only)."
         },
         { role: "user", content: truncated }
       ],
