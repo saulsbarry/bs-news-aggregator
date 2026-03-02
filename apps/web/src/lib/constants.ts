@@ -22,7 +22,7 @@ export function toCanonicalTopic(topics: string[]): CanonicalTopic {
     return "Technology";
   if (/politic|election|government|congress|senate|parliament|democrat|republican|vote|campaign|legislation|president|minister/.test(text))
     return "Politics";
-  if (/sport|football|soccer|basketball|tennis|golf|baseball|hockey|cricket|rugby|olympic|nfl|nba|mlb|nhl|athlete|championship/.test(text))
+  if (/sport|football|soccer|basketball|tennis|golf|baseball|hockey|cricket|rugby|olympic|nfl|nba|mlb|nhl|athlete|championship|tournament|league|wicket|innings|icc|semi.final|semifinal|formula.?1\b|f1\b|grand prix/.test(text))
     return "Sports";
   if (/business|econom|financ|market|stock|trade|invest|bank|startup|corporate|gdp|inflation|employ|revenue|profit/.test(text))
     return "Business";
