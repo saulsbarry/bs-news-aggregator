@@ -10,7 +10,7 @@ BEGIN
       THEN RETURN 'Technology';
     WHEN LOWER(t) SIMILAR TO '%(politic|election|government|congress|senate|parliament|democrat|republican|vote|campaign|legislation|diplomacy|geopolit|president|minister|white house)%'
       THEN RETURN 'Politics';
-    WHEN LOWER(t) SIMILAR TO '%(sport|football|soccer|basketball|tennis|golf|baseball|hockey|cricket|rugby|olympic|nfl|nba|mlb|nhl|formula 1|f1|athlete|championship|tournament|league)%'
+    WHEN LOWER(t) SIMILAR TO '%(sport|football|soccer|basketball|tennis|golf|baseball|hockey|cricket|rugby|olympic|nfl|nba|mlb|nhl|formula 1|f1|grand prix|athlete|championship|tournament|league|wicket|innings|icc|semi-final|semifinal)%'
       THEN RETURN 'Sports';
     WHEN LOWER(t) SIMILAR TO '%(business|econom|financ|market|stock|trade|invest|bank|startup|entrepreneur|corporate|gdp|inflation|employ|job|revenue|profit|merger|acquisition)%'
       THEN RETURN 'Business';
