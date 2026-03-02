@@ -10,7 +10,7 @@ export async function getDb(): Promise<Pool> {
 
     pool = new Pool({
       connectionString,
-      max: 10
+      max: 1
     });
   }
 
