@@ -1,5 +1,6 @@
 import { getDb } from "../pg";
 import { summarize, embed } from "../ai/client";
+import { toCanonicalTopic } from "../constants";
 
 const ENRICH_BATCH_SIZE = 50;
 const EMBEDDING_MODEL_NAME = "text-embedding-3-small";
@@ -52,7 +53,7 @@ export async function runEnrichment(): Promise<EnrichResult> {
         `,
           [
             summaryResult.summary,
-            summaryResult.topics[0] ?? null,
+            toCanonicalTopic(summaryResult.topics),
             summaryResult.topics.length ? JSON.stringify(summaryResult.topics) : null,
             row.id
           ]
