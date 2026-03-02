@@ -28,11 +28,11 @@ $$ LANGUAGE plpgsql;
 UPDATE clusters
 SET topic_primary = normalize_topic(topic_primary)
 WHERE topic_primary IS NOT NULL
-  AND topic_primary NOT IN ('Business','Entertainment','Health','Politics','Science','Sports','Technology','World');
+  AND topic_primary NOT IN ('Business','Entertainment','Health','Politics','Science','Sports','Technology');
 
 UPDATE articles
 SET topic_primary = normalize_topic(topic_primary)
 WHERE topic_primary IS NOT NULL
-  AND topic_primary NOT IN ('Business','Entertainment','Health','Politics','Science','Sports','Technology','World');
+  AND topic_primary NOT IN ('Business','Entertainment','Health','Politics','Science','Sports','Technology');
 
 DROP FUNCTION normalize_topic;
