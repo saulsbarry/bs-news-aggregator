@@ -16,9 +16,9 @@ export interface RankedFeed {
 }
 
 export interface FeedFilters {
-  topic?: string;
-  sourceId?: string;
-  timeRange?: "24h" | "48h" | "7d";
+  topics?: string[];
+  sourceIds?: string[];
+  timeRange?: "6h" | "12h" | "24h" | "48h" | "7d";
 }
 
 export async function getRankedFeed(
@@ -30,32 +30,38 @@ export async function getRankedFeed(
   const db = await getDb();
 
   const since =
-    opts.timeRange === "24h"
-      ? new Date(Date.now() - 24 * 60 * 60 * 1000)
-      : opts.timeRange === "48h"
-        ? new Date(Date.now() - 48 * 60 * 60 * 1000)
-        : opts.timeRange === "7d"
-          ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          : null;
+    opts.timeRange === "6h"
+      ? new Date(Date.now() - 6 * 60 * 60 * 1000)
+      : opts.timeRange === "12h"
+        ? new Date(Date.now() - 12 * 60 * 60 * 1000)
+        : opts.timeRange === "24h"
+          ? new Date(Date.now() - 24 * 60 * 60 * 1000)
+          : opts.timeRange === "48h"
+            ? new Date(Date.now() - 48 * 60 * 60 * 1000)
+            : opts.timeRange === "7d"
+              ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+              : null;
 
-  const params: (string | number | Date)[] = [];
+  const params: unknown[] = [];
   let paramIndex = 0;
   const conditions: string[] = ["a.is_visible = TRUE"];
-  if (opts.topic) {
+
+  if (opts.topics && opts.topics.length > 0) {
     paramIndex += 1;
-    conditions.push(`c.topic_primary = $${paramIndex}`);
-    params.push(opts.topic);
+    conditions.push(`c.topic_primary = ANY($${paramIndex}::text[])`);
+    params.push(opts.topics);
   }
-  if (opts.sourceId) {
+  if (opts.sourceIds && opts.sourceIds.length > 0) {
     paramIndex += 1;
-    conditions.push(`a.source_id = $${paramIndex}`);
-    params.push(opts.sourceId);
+    conditions.push(`a.source_id = ANY($${paramIndex}::uuid[])`);
+    params.push(opts.sourceIds);
   }
   if (since) {
     paramIndex += 1;
     conditions.push(`a.published_at >= $${paramIndex}`);
     params.push(since);
   }
+
   const whereClause =
     conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   paramIndex += 1;
@@ -95,8 +101,6 @@ export async function getRankedFeed(
     params
   );
 
-  const now = new Date();
-
   return {
     clusters: rows.rows.map((row: FeedRow) => ({
       id: row.id,
@@ -113,4 +117,3 @@ export async function getRankedFeed(
     }))
   };
 }
-
