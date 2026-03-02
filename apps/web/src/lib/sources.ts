@@ -1,4 +1,5 @@
 import { getDb } from "./pg";
+import { cacheGet, cacheSet } from "./cache";
 
 export interface SourceItem {
   id: string;
@@ -12,6 +13,9 @@ export interface SourceItem {
 }
 
 export async function getSources(): Promise<SourceItem[]> {
+  const cached = await cacheGet<SourceItem[]>("sources:v1");
+  if (cached) return cached;
+
   const db = await getDb();
   type SourceRow = {
     id: string;
@@ -28,7 +32,7 @@ export async function getSources(): Promise<SourceItem[]> {
      FROM sources
      ORDER BY name`
   );
-  return rows.map((r: SourceRow) => ({
+  const result = rows.map((r: SourceRow) => ({
     id: r.id,
     name: r.name,
     slug: r.slug,
@@ -38,4 +42,7 @@ export async function getSources(): Promise<SourceItem[]> {
     isActive: r.is_active,
     lastFetchedAt: r.last_fetched_at
   }));
+
+  await cacheSet("sources:v1", result, 300);
+  return result;
 }

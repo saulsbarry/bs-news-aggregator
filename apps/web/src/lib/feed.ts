@@ -1,4 +1,5 @@
 import { getDb } from "./pg";
+import { cacheGet, cacheSet } from "./cache";
 import { formatDistanceToNowStrict } from "date-fns";
 
 export interface RankedCluster {
@@ -27,6 +28,10 @@ export async function getRankedFeed(
     offset: number;
   } & FeedFilters
 ): Promise<RankedFeed> {
+  const cacheKey = `feed:v1:${opts.limit}:${opts.offset}:${(opts.topics ?? []).join("|")}:${(opts.sourceIds ?? []).join("|")}:${opts.timeRange ?? ""}`;
+  const cached = await cacheGet<RankedFeed>(cacheKey);
+  if (cached) return cached;
+
   const db = await getDb();
 
   const since =
@@ -101,7 +106,7 @@ export async function getRankedFeed(
     params
   );
 
-  return {
+  const result: RankedFeed = {
     clusters: rows.rows.map((row: FeedRow) => ({
       id: row.id,
       mainTitle: row.main_title,
@@ -116,4 +121,7 @@ export async function getRankedFeed(
         : null
     }))
   };
+
+  await cacheSet(cacheKey, result, 60);
+  return result;
 }
