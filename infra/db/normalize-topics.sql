@@ -35,4 +35,11 @@ SET topic_primary = normalize_topic(topic_primary)
 WHERE topic_primary IS NOT NULL
   AND topic_primary NOT IN ('Business','Entertainment','Health','Politics','Science','Sports','Technology');
 
+-- Re-classify articles stuck at 'World' using their topics JSONB keywords,
+-- since topic_primary='World' has no useful signal to match against.
+UPDATE articles
+SET topic_primary = normalize_topic(topics::text)
+WHERE topic_primary = 'World'
+  AND topics IS NOT NULL;
+
 DROP FUNCTION normalize_topic;
