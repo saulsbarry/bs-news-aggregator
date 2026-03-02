@@ -16,8 +16,8 @@ export interface RankedFeed {
 }
 
 export interface FeedFilters {
-  topic?: string;
-  sourceId?: string;
+  topics?: string[];
+  sourceIds?: string[];
   timeRange?: "24h" | "48h" | "7d";
 }
 
@@ -38,24 +38,26 @@ export async function getRankedFeed(
           ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
           : null;
 
-  const params: (string | number | Date)[] = [];
+  const params: unknown[] = [];
   let paramIndex = 0;
   const conditions: string[] = ["a.is_visible = TRUE"];
-  if (opts.topic) {
+
+  if (opts.topics && opts.topics.length > 0) {
     paramIndex += 1;
-    conditions.push(`c.topic_primary = $${paramIndex}`);
-    params.push(opts.topic);
+    conditions.push(`c.topic_primary = ANY($${paramIndex}::text[])`);
+    params.push(opts.topics);
   }
-  if (opts.sourceId) {
+  if (opts.sourceIds && opts.sourceIds.length > 0) {
     paramIndex += 1;
-    conditions.push(`a.source_id = $${paramIndex}`);
-    params.push(opts.sourceId);
+    conditions.push(`a.source_id = ANY($${paramIndex}::uuid[])`);
+    params.push(opts.sourceIds);
   }
   if (since) {
     paramIndex += 1;
     conditions.push(`a.published_at >= $${paramIndex}`);
     params.push(since);
   }
+
   const whereClause =
     conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   paramIndex += 1;
@@ -95,8 +97,6 @@ export async function getRankedFeed(
     params
   );
 
-  const now = new Date();
-
   return {
     clusters: rows.rows.map((row: FeedRow) => ({
       id: row.id,
@@ -113,4 +113,3 @@ export async function getRankedFeed(
     }))
   };
 }
-
