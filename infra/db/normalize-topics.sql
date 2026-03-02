@@ -30,6 +30,22 @@ SET topic_primary = normalize_topic(topic_primary)
 WHERE topic_primary IS NOT NULL
   AND topic_primary NOT IN ('Business','Entertainment','Health','Politics','Science','Sports','Technology');
 
+-- Re-classify clusters stuck at 'World' using the most common topic_primary
+-- among their member articles (which have already been correctly classified above).
+UPDATE clusters c
+SET topic_primary = (
+  SELECT a.topic_primary
+  FROM cluster_articles ca
+  JOIN articles a ON a.id = ca.article_id
+  WHERE ca.cluster_id = c.id
+    AND a.topic_primary IS NOT NULL
+    AND a.topic_primary != 'World'
+  GROUP BY a.topic_primary
+  ORDER BY COUNT(*) DESC
+  LIMIT 1
+)
+WHERE c.topic_primary = 'World';
+
 UPDATE articles
 SET topic_primary = normalize_topic(topic_primary)
 WHERE topic_primary IS NOT NULL
