@@ -3,6 +3,7 @@ import { getDb } from "./pg";
 export interface SearchFilters {
   topic?: string;
   sourceId?: string;
+  timeRange?: "6h" | "12h" | "24h" | "48h" | "7d";
 }
 
 export interface SearchHit {
@@ -29,6 +30,14 @@ export async function searchArticles(
 ): Promise<SearchResult> {
   const db = await getDb();
 
+  const intervalMap: Record<NonNullable<SearchFilters["timeRange"]>, string> = {
+    "6h": "6 hours",
+    "12h": "12 hours",
+    "24h": "24 hours",
+    "48h": "48 hours",
+    "7d": "7 days",
+  };
+
   const params: (string | number)[] = [];
   let paramIndex = 0;
   const conditions: string[] = ["a.is_visible = TRUE"];
@@ -42,6 +51,9 @@ export async function searchArticles(
     paramIndex += 1;
     conditions.push(`a.source_id = $${paramIndex}`);
     params.push(filters.sourceId);
+  }
+  if (filters.timeRange) {
+    conditions.push(`a.published_at >= NOW() - INTERVAL '${intervalMap[filters.timeRange]}'`);
   }
 
   const whereClause =
