@@ -22,13 +22,22 @@ export async function updateHotScores(): Promise<void> {
       JOIN sources s ON s.id = a.source_id
       GROUP BY c.id
     ),
+    engagement AS (
+      SELECT cluster_id, COUNT(*) AS click_count
+      FROM user_events
+      WHERE event_type = 'cluster_click'
+        AND created_at >= NOW() - INTERVAL '24 hours'
+      GROUP BY cluster_id
+    ),
     scored AS (
       SELECT
-        id,
-        article_count::real * 0.4
-          + LEAST(EXTRACT(EPOCH FROM (NOW() - last_published)) / 3600, 72) * (-0.02) + 1.5
-          + LEAST(source_score * 0.1, 2) AS new_score
-      FROM cluster_metrics
+        cm.id,
+        cm.article_count::real * 0.4
+          + LEAST(EXTRACT(EPOCH FROM (NOW() - cm.last_published)) / 3600, 72) * (-0.02) + 1.5
+          + LEAST(cm.source_score * 0.1, 2)
+          + LEAST(COALESCE(e.click_count, 0) * 0.05, 1) AS new_score
+      FROM cluster_metrics cm
+      LEFT JOIN engagement e ON e.cluster_id = cm.id
     )
     UPDATE clusters c
     SET hot_score = s.new_score

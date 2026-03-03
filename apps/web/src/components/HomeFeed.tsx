@@ -24,6 +24,14 @@ interface Props {
   sources: SourceItem[];
 }
 
+function trackEvent(payload: object) {
+  fetch("/api/events", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
+}
+
 export function HomeFeed({ initialClusters, sources }: Props) {
   const [clusters, setClusters] = useState(initialClusters);
   const [loading, setLoading] = useState(false);
@@ -199,6 +207,7 @@ export function HomeFeed({ initialClusters, sources }: Props) {
               <Link
                 href={`/story/${cluster.id}`}
                 className="text-base font-semibold leading-snug hover:underline"
+                onClick={() => trackEvent({ event_type: "cluster_click", cluster_id: cluster.id })}
               >
                 {cluster.mainTitle}
               </Link>

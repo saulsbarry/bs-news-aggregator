@@ -20,6 +20,7 @@ export interface ClusterDetail {
   primaryTopic: string | null;
   articles: ClusterArticle[];
   lastUpdatedHuman: string | null;
+  lastPublishedAt: Date | null;
 }
 
 export async function getClusterById(
@@ -79,6 +80,7 @@ export async function getClusterById(
     mainTitle: c.main_title,
     summary: c.summary,
     primaryTopic: c.topic_primary,
+    lastPublishedAt: c.last_published,
     lastUpdatedHuman: c.last_published
       ? formatDistanceToNowStrict(c.last_published, { addSuffix: true })
       : null,

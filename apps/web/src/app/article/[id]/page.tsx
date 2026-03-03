@@ -2,6 +2,10 @@ import Link from "next/link";
 import { getArticleById } from "../../../lib/article";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { JsonLd } from "../../../components/JsonLd";
+
+const BASE_URL =
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://bs-news-aggregator-web.vercel.app";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -11,13 +15,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const article = await getArticleById(id);
   if (!article) return {};
+  const ogImageUrl = `/api/og?title=${encodeURIComponent(article.title)}`;
   return {
     title: `${article.title} | BS News`,
     description: article.summary ?? undefined,
     openGraph: {
+      type: "article",
+      url: `${BASE_URL}/article/${id}`,
       title: article.title,
-      description: article.summary ?? undefined
-    }
+      description: article.summary ?? undefined,
+      images: [{ url: ogImageUrl, width: 1200, height: 630 }],
+      publishedTime: article.publishedAt.toISOString(),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.summary ?? undefined,
+      images: [ogImageUrl],
+    },
   };
 }
 
@@ -26,8 +41,27 @@ export default async function ArticlePage({ params }: Props) {
   const article = await getArticleById(id);
   if (!article) notFound();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: article.title,
+    description: article.summary,
+    url: article.url,
+    datePublished: article.publishedAt.toISOString(),
+    author: {
+      "@type": "Organization",
+      name: article.sourceName,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "BS News",
+      url: BASE_URL,
+    },
+  };
+
   return (
     <div className="space-y-6">
+      <JsonLd data={jsonLd} />
       <header className="space-y-2">
         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           <span>{article.sourceName}</span>

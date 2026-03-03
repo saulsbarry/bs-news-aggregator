@@ -3,9 +3,20 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "../components/ThemeToggle";
 
+const BASE_URL =
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://bs-news-aggregator-web.vercel.app";
+
 export const metadata = {
+  metadataBase: new URL(BASE_URL),
   title: "BS News Aggregator",
-  description: "AI-powered news aggregation with summaries and clustering."
+  description: "AI-powered news aggregation with summaries and clustering.",
+  openGraph: {
+    siteName: "BS News",
+    images: [{ url: "/api/og?title=BS+News", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
