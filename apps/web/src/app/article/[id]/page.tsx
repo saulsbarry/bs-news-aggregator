@@ -7,6 +7,10 @@ import { JsonLd } from "../../../components/JsonLd";
 const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://bs-news-aggregator-web.vercel.app";
 
+function truncate(text: string, max: number) {
+  return text.length <= max ? text : text.slice(0, max - 1) + "…";
+}
+
 interface Props {
   params: Promise<{ id: string }>;
 }
@@ -15,22 +19,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const article = await getArticleById(id);
   if (!article) return {};
+  const ogTitle = truncate(article.title, 60);
+  const ogDescription = article.summary ? truncate(article.summary, 160) : undefined;
   const ogImageUrl = `/api/og?title=${encodeURIComponent(article.title)}`;
   return {
     title: `${article.title} | BS News`,
-    description: article.summary ?? undefined,
+    description: ogDescription,
     openGraph: {
       type: "article",
       url: `${BASE_URL}/article/${id}`,
-      title: article.title,
-      description: article.summary ?? undefined,
+      title: ogTitle,
+      description: ogDescription,
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
       publishedTime: article.publishedAt.toISOString(),
     },
     twitter: {
       card: "summary_large_image",
-      title: article.title,
-      description: article.summary ?? undefined,
+      title: ogTitle,
+      description: ogDescription,
       images: [ogImageUrl],
     },
   };

@@ -7,6 +7,10 @@ import { JsonLd } from "../../../components/JsonLd";
 const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://bs-news-aggregator-web.vercel.app";
 
+function truncate(text: string, max: number) {
+  return text.length <= max ? text : text.slice(0, max - 1) + "…";
+}
+
 interface Props {
   params: Promise<{ clusterId: string }>;
 }
@@ -16,15 +20,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cluster = await getClusterById(clusterId);
   if (!cluster) return {};
   const title = cluster.mainTitle ?? "Story";
+  const ogTitle = truncate(title, 60);
+  const ogDescription = cluster.summary ? truncate(cluster.summary, 160) : undefined;
   const ogImageUrl = `/api/og?title=${encodeURIComponent(title)}`;
   return {
     title: `${title} | BS News`,
-    description: cluster.summary ?? undefined,
+    description: ogDescription,
     openGraph: {
       type: "article",
       url: `${BASE_URL}/story/${clusterId}`,
-      title,
-      description: cluster.summary ?? undefined,
+      title: ogTitle,
+      description: ogDescription,
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
       ...(cluster.lastPublishedAt && {
         publishedTime: cluster.lastPublishedAt.toISOString(),
@@ -32,8 +38,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description: cluster.summary ?? undefined,
+      title: ogTitle,
+      description: ogDescription,
       images: [ogImageUrl],
     },
   };
