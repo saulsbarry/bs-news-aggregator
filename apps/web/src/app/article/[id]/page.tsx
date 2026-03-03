@@ -3,6 +3,7 @@ import { getArticleById } from "../../../lib/article";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { JsonLd } from "../../../components/JsonLd";
+import { ShareButtons } from "../../../components/ShareButtons";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://bs-news-aggregator-web.vercel.app";
@@ -89,6 +90,11 @@ export default async function ArticlePage({ params }: Props) {
           </p>
         )}
       </header>
+
+      <ShareButtons
+        url={`${BASE_URL}/article/${id}`}
+        title={article.title}
+      />
 
       <div className="flex flex-col gap-4">
         <a

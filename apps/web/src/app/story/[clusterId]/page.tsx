@@ -3,6 +3,7 @@ import { getClusterById } from "../../../lib/cluster";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { JsonLd } from "../../../components/JsonLd";
+import { ShareButtons } from "../../../components/ShareButtons";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://bs-news-aggregator-web.vercel.app";
@@ -89,6 +90,10 @@ export default async function StoryPage({ params }: Props) {
             {cluster.summary}
           </p>
         )}
+        <ShareButtons
+          url={`${BASE_URL}/story/${clusterId}`}
+          title={cluster.mainTitle ?? "BS News"}
+        />
       </header>
 
       <ul className="space-y-3">
