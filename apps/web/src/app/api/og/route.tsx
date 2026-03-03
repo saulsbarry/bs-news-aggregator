@@ -43,6 +43,18 @@ export function GET(req: NextRequest) {
         >
           {title}
         </div>
+        <div
+          style={{
+            marginTop: 32,
+            fontSize: 20,
+            color: "#94a3b8",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          bs-news-aggregator-web.vercel.app · Read more →
+        </div>
       </div>
     ),
     { width: 1200, height: 630 }
