@@ -25,7 +25,7 @@ export async function runClustering(): Promise<ClusterResult> {
       SELECT 1 FROM cluster_articles ca WHERE ca.article_id = ae.article_id
     )
       AND a.topic_primary IS NOT NULL
-    ORDER BY ae.article_id
+    ORDER BY a.published_at DESC
     LIMIT 50
   `
   );
