@@ -90,7 +90,13 @@ export async function getRankedFeed(
       c.id,
       c.main_title,
       c.summary,
-      c.topic_primary,
+      COALESCE(c.topic_primary, (
+        SELECT a2.topic_primary
+        FROM cluster_articles ca2
+        JOIN articles a2 ON a2.id = ca2.article_id
+        WHERE ca2.cluster_id = c.id AND a2.topic_primary IS NOT NULL
+        LIMIT 1
+      )) AS topic_primary,
       COUNT(a.id) AS article_count,
       ARRAY_AGG(DISTINCT s.name) AS source_names,
       MAX(a.published_at) AS last_article_published_at

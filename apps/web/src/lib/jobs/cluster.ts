@@ -20,9 +20,11 @@ export async function runClustering(): Promise<ClusterResult> {
     `
     SELECT ae.article_id
     FROM article_embeddings ae
+    JOIN articles a ON a.id = ae.article_id
     WHERE NOT EXISTS (
       SELECT 1 FROM cluster_articles ca WHERE ca.article_id = ae.article_id
     )
+      AND a.topic_primary IS NOT NULL
     ORDER BY ae.article_id
     LIMIT 50
   `
