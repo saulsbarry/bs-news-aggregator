@@ -2,6 +2,34 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getDb } from "../../../lib/pg";
 import { randomUUID } from "crypto";
+import { Redis } from "@upstash/redis";
+
+// Rate limit: 30 requests per minute per IP
+const RATE_LIMIT = 30;
+const RATE_WINDOW = 60; // seconds
+
+let redis: Redis | null = null;
+function getRedis(): Redis | null {
+  if (redis) return redis;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  redis = new Redis({ url, token });
+  return redis;
+}
+
+async function isRateLimited(ip: string): Promise<boolean> {
+  const client = getRedis();
+  if (!client) return false; // if Redis isn't configured, allow through
+  try {
+    const key = `rate:events:${ip}`;
+    const count = await client.incr(key);
+    if (count === 1) await client.expire(key, RATE_WINDOW);
+    return count > RATE_LIMIT;
+  } catch {
+    return false; // don't block requests on Redis errors
+  }
+}
 
 export const runtime = "nodejs";
 
@@ -12,6 +40,12 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  if (await isRateLimited(ip)) {
+    return new NextResponse(null, { status: 429 });
+  }
+
   let body: unknown;
   try {
     body = await req.json();
