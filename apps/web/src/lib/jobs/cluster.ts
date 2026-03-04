@@ -2,6 +2,7 @@ import { getDb } from "../pg";
 
 const SIMILARITY_THRESHOLD = 0.78;
 const RECENT_HOURS = 48;
+const CLUSTER_BATCH_SIZE = 200;
 
 export interface ClusterResult {
   clustered: number;
@@ -26,8 +27,9 @@ export async function runClustering(): Promise<ClusterResult> {
     )
       AND a.topic_primary IS NOT NULL
     ORDER BY a.published_at DESC
-    LIMIT 50
-  `
+    LIMIT $1
+  `,
+    [CLUSTER_BATCH_SIZE]
   );
 
   let clustered = 0;
