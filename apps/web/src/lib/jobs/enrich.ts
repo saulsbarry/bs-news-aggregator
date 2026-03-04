@@ -2,7 +2,7 @@ import { getDb } from "../pg";
 import { summarize, embed } from "../ai/client";
 import { toCanonicalTopic } from "../constants";
 
-const ENRICH_BATCH_SIZE = 50;
+const ENRICH_BATCH_SIZE = 75;
 const ENRICH_CONCURRENCY = 5;
 const EMBEDDING_MODEL_NAME = "text-embedding-3-small";
 
