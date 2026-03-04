@@ -3,6 +3,7 @@ import { summarize, embed } from "../ai/client";
 import { toCanonicalTopic } from "../constants";
 
 const ENRICH_BATCH_SIZE = 50;
+const ENRICH_CONCURRENCY = 5;
 const EMBEDDING_MODEL_NAME = "text-embedding-3-small";
 
 export interface EnrichResult {
@@ -35,51 +36,68 @@ export async function runEnrichment(): Promise<EnrichResult> {
   let enriched = 0;
   let failed = 0;
 
-  for (const row of pending) {
-    try {
-      const text = [row.title, row.summary, row.raw_content]
-        .filter(Boolean)
-        .join("\n\n");
+  async function enrichOne(row: typeof pending[number]): Promise<boolean> {
+    const text = [row.title, row.summary, row.raw_content]
+      .filter(Boolean)
+      .join("\n\n");
 
-      const summaryResult = await summarize(text);
-      if (summaryResult) {
-        await db.query(
-          `
-          UPDATE articles
-          SET summary = $1,
-              topic_primary = $2,
-              topics = $3
-          WHERE id = $4
-        `,
-          [
-            summaryResult.summary,
-            toCanonicalTopic(summaryResult.topics),
-            summaryResult.topics.length ? JSON.stringify(summaryResult.topics) : null,
-            row.id
-          ]
-        );
+    const [summaryResult, vector] = await Promise.all([
+      summarize(text),
+      embed(text),
+    ]);
+
+    if (summaryResult) {
+      await db.query(
+        `
+        UPDATE articles
+        SET summary = $1,
+            topic_primary = $2,
+            topics = $3
+        WHERE id = $4
+      `,
+        [
+          summaryResult.summary,
+          toCanonicalTopic(summaryResult.topics),
+          summaryResult.topics.length ? JSON.stringify(summaryResult.topics) : null,
+          row.id,
+        ]
+      );
+    }
+
+    if (vector && vector.length === 1536) {
+      const vecStr = `[${vector.join(",")}]`;
+      await db.query(
+        `
+        INSERT INTO article_embeddings (article_id, embedding, model_name)
+        VALUES ($1, $2::vector, $3)
+        ON CONFLICT (article_id) DO UPDATE
+        SET embedding = EXCLUDED.embedding,
+            model_name = EXCLUDED.model_name
+      `,
+        [row.id, vecStr, EMBEDDING_MODEL_NAME]
+      );
+    }
+
+    return true;
+  }
+
+  // Process in parallel with capped concurrency
+  const queue = [...pending];
+  async function worker() {
+    while (queue.length > 0) {
+      const row = queue.shift()!;
+      try {
+        await enrichOne(row);
+        enriched += 1;
+      } catch {
+        failed += 1;
       }
-
-      const vector = await embed(text);
-      if (vector && vector.length === 1536) {
-        const vecStr = `[${vector.join(",")}]`;
-        await db.query(
-          `
-          INSERT INTO article_embeddings (article_id, embedding, model_name)
-          VALUES ($1, $2::vector, $3)
-          ON CONFLICT (article_id) DO UPDATE
-          SET embedding = EXCLUDED.embedding,
-              model_name = EXCLUDED.model_name
-        `,
-          [row.id, vecStr, EMBEDDING_MODEL_NAME]
-        );
-      }
-
-      enriched += 1;
-    } catch {
-      failed += 1;
     }
   }
+
+  await Promise.all(
+    Array.from({ length: ENRICH_CONCURRENCY }, () => worker())
+  );
 
   return { enriched, failed };
 }
