@@ -1,6 +1,6 @@
 import { getDb } from "../pg";
 
-const SIMILARITY_THRESHOLD = 0.82;
+const SIMILARITY_THRESHOLD = 0.78;
 const RECENT_HOURS = 48;
 
 export interface ClusterResult {
