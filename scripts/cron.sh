@@ -2,7 +2,8 @@
 # BS News Aggregator - cron trigger script
 # Add to crontab:
 #   0,30 * * * * /path/to/scripts/cron.sh ingest
-#   10,40 * * * * /path/to/scripts/cron.sh enrich
+#   3,33 * * * * /path/to/scripts/cron.sh enrich
+#   8,38 * * * * /path/to/scripts/cron.sh cluster
 
 APP_URL="https://bs-news-aggregator-web.vercel.app"
 CRON_SECRET="${CRON_SECRET}"
@@ -13,8 +14,8 @@ if [[ -z "$CRON_SECRET" ]]; then
   exit 1
 fi
 
-if [[ "$JOB" != "ingest" && "$JOB" != "enrich" ]]; then
-  echo "ERROR: Usage: $0 [ingest|enrich]"
+if [[ "$JOB" != "ingest" && "$JOB" != "enrich" && "$JOB" != "cluster" ]]; then
+  echo "ERROR: Usage: $0 [ingest|enrich|cluster]"
   exit 1
 fi
 
