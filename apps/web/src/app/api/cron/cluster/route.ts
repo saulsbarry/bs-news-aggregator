@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { runEnrichment } from "../../../../lib/jobs/enrich";
+import { runClustering } from "../../../../lib/jobs/cluster";
+import { updateHotScores } from "../../../../lib/jobs/hotScore";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -18,7 +19,8 @@ export async function POST(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const enrichResult = await runEnrichment();
+  const clusterResult = await runClustering();
+  await updateHotScores();
 
-  return NextResponse.json({ enrich: enrichResult });
+  return NextResponse.json({ cluster: clusterResult });
 }
