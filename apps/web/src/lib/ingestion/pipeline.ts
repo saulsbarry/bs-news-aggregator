@@ -20,6 +20,8 @@ export interface IngestionJobResult {
 }
 
 export interface IngestionRunSummary {
+  totalFetched: number;
+  totalNew: number;
   jobs: IngestionJobResult[];
 }
 
@@ -41,7 +43,11 @@ export async function fetchAllSources(): Promise<IngestionRunSummary> {
     results.push(result);
   }
 
-  return { jobs: results };
+  return {
+    totalFetched: results.reduce((sum, r) => sum + r.fetchedCount, 0),
+    totalNew: results.reduce((sum, r) => sum + r.newArticlesCount, 0),
+    jobs: results,
+  };
 }
 
 async function ingestSource(source: SourceRow): Promise<IngestionJobResult> {
