@@ -4,6 +4,11 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { JsonLd } from "../../../components/JsonLd";
 import { ShareButtons } from "../../../components/ShareButtons";
+import { SaveButton } from "../../../components/SaveButton";
+import { getSessionFromCookies } from "../../../lib/auth/session";
+import { isArticleSaved } from "../../../lib/saved";
+
+export const dynamic = "force-dynamic";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://bs-news-aggregator-web.vercel.app";
@@ -45,8 +50,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArticlePage({ params }: Props) {
   const { id } = await params;
-  const article = await getArticleById(id);
+  const [article, session] = await Promise.all([getArticleById(id), getSessionFromCookies()]);
   if (!article) notFound();
+
+  const saved = session ? await isArticleSaved(session.sub, id) : false;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -91,10 +98,13 @@ export default async function ArticlePage({ params }: Props) {
         )}
       </header>
 
-      <ShareButtons
-        url={`${BASE_URL}/article/${id}`}
-        title={article.title}
-      />
+      <div className="flex flex-wrap items-center gap-2">
+        <ShareButtons
+          url={`${BASE_URL}/article/${id}`}
+          title={article.title}
+        />
+        <SaveButton articleId={id} initialSaved={saved} />
+      </div>
 
       <div className="flex flex-col gap-4">
         <a

@@ -2,6 +2,7 @@ import "./../styles/globals.css";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { AuthNav } from "../components/AuthNav";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://bs-news-aggregator-web.vercel.app";
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 >
                   Sources
                 </Link>
+                <AuthNav />
                 <ThemeToggle />
               </nav>
             </div>

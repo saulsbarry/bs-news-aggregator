@@ -4,6 +4,11 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { JsonLd } from "../../../components/JsonLd";
 import { ShareButtons } from "../../../components/ShareButtons";
+import { SaveButton } from "../../../components/SaveButton";
+import { getSessionFromCookies } from "../../../lib/auth/session";
+import { getSavedArticleIds } from "../../../lib/saved";
+
+export const dynamic = "force-dynamic";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://bs-news-aggregator-web.vercel.app";
@@ -48,8 +53,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function StoryPage({ params }: Props) {
   const { clusterId } = await params;
-  const cluster = await getClusterById(clusterId);
+  const [cluster, session] = await Promise.all([getClusterById(clusterId), getSessionFromCookies()]);
   if (!cluster) notFound();
+
+  const articleIds = cluster.articles.map((a) => a.id);
+  const savedIds = session ? await getSavedArticleIds(session.sub, articleIds) : new Set<string>();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -120,17 +128,20 @@ export default async function StoryPage({ params }: Props) {
                 {article.summary}
               </p>
             )}
-            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-              <span>{article.sourceName}</span>
-              <span>·</span>
-              <a
-                href={article.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline"
-              >
-                Read original →
-              </a>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                <span>{article.sourceName}</span>
+                <span>·</span>
+                <a
+                  href={article.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  Read original →
+                </a>
+              </div>
+              <SaveButton articleId={article.id} initialSaved={savedIds.has(article.id)} />
             </div>
           </li>
         ))}
