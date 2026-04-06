@@ -134,6 +134,10 @@ async function ingestRssSource(source: SourceRow): Promise<{
       continue;
     }
 
+    if (isBoilerplateTitle(title)) {
+      continue;
+    }
+
     fetchedCount += 1;
 
     const guid =
@@ -200,5 +204,21 @@ async function ingestRssSource(source: SourceRow): Promise<{
 
 function hashExternalId(input: string): string {
   return crypto.createHash("sha1").update(input).digest("hex");
+}
+
+// Titles that are generic live-blog stubs or recurring daily boilerplate.
+// Matched case-insensitively after trimming.
+const BOILERPLATE_TITLE_PATTERNS: RegExp[] = [
+  /^here'?s the latest\.?$/i,
+  /^live updates?\.?$/i,
+  /^breaking news\.?$/i,
+  /^live coverage\.?$/i,
+  /^latest updates?\.?$/i,
+  /^live blog\.?$/i,
+];
+
+function isBoilerplateTitle(title: string): boolean {
+  const t = title.trim();
+  return BOILERPLATE_TITLE_PATTERNS.some((re) => re.test(t));
 }
 
