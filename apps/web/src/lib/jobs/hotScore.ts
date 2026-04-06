@@ -32,7 +32,7 @@ export async function updateHotScores(): Promise<void> {
     scored AS (
       SELECT
         cm.id,
-        cm.article_count::real * 0.4
+        LEAST(cm.article_count::real, 10) * 0.4
           + LEAST(EXTRACT(EPOCH FROM (NOW() - cm.last_published)) / 3600, 72) * (-0.02) + 1.5
           + LEAST(cm.source_score * 0.1, 2)
           + LEAST(COALESCE(e.click_count, 0) * 0.05, 1) AS new_score
