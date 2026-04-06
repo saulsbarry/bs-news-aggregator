@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runClustering } from "../../../../lib/jobs/cluster";
 import { updateHotScores } from "../../../../lib/jobs/hotScore";
+import { runPurge } from "../../../../lib/jobs/purge";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
 
   const clusterResult = await runClustering();
   await updateHotScores();
+  const purgeResult = await runPurge();
 
-  return NextResponse.json({ cluster: clusterResult });
+  return NextResponse.json({ cluster: clusterResult, purge: purgeResult });
 }
