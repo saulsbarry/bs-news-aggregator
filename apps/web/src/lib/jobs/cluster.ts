@@ -61,8 +61,10 @@ async function clusterArticle(
     FROM article_embeddings ae
     JOIN articles a ON a.id = ae.article_id
     JOIN cluster_articles ca ON ca.article_id = ae.article_id
+    JOIN clusters c ON c.id = ca.cluster_id
     WHERE ae.article_id != $1
       AND a.published_at >= $2
+      AND c.created_at >= $2
     ORDER BY ae.embedding <=> (SELECT embedding FROM my_embedding)
     LIMIT 1
   `,
