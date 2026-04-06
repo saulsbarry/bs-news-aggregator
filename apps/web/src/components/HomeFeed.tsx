@@ -22,6 +22,7 @@ const TIME_RANGES = [
 interface Props {
   initialClusters: RankedCluster[];
   sources: SourceItem[];
+  defaultTopics?: string[];
 }
 
 function trackEvent(payload: object) {
@@ -32,12 +33,12 @@ function trackEvent(payload: object) {
   }).catch(() => {});
 }
 
-export function HomeFeed({ initialClusters, sources }: Props) {
+export function HomeFeed({ initialClusters, sources, defaultTopics = [] }: Props) {
   const [clusters, setClusters] = useState(initialClusters);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialClusters.length === PAGE_SIZE);
 
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>(defaultTopics);
   const [selectedSourceIds, setSelectedSourceIds] = useState<string[]>([]);
   const [timeRange, setTimeRange] = useState("");
 
