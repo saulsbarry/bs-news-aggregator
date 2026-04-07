@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { runClustering } from "../../../../lib/jobs/cluster";
-import { updateHotScores } from "../../../../lib/jobs/hotScore";
+import { runPurge } from "../../../../lib/jobs/purge";
 
 export const runtime = "nodejs";
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const expectedSecret = process.env.CRON_SECRET;
@@ -19,8 +18,7 @@ export async function POST(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const clusterResult = await runClustering();
-  await updateHotScores();
+  const purgeResult = await runPurge();
 
-  return NextResponse.json({ cluster: clusterResult });
+  return NextResponse.json({ purge: purgeResult });
 }
