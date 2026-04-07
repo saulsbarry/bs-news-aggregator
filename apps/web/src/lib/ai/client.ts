@@ -44,7 +44,8 @@ export async function summarize(text: string): Promise<SummarizeResult | null> {
       : [];
 
     return { summary, topics };
-  } catch {
+  } catch (err) {
+    console.error("[ai/summarize] error:", err);
     return null;
   }
 }
@@ -65,7 +66,8 @@ export async function embed(text: string): Promise<number[] | null> {
     });
     const vec = res.data[0]?.embedding;
     return Array.isArray(vec) ? vec : null;
-  } catch {
+  } catch (err) {
+    console.error("[ai/embed] error:", err);
     return null;
   }
 }
