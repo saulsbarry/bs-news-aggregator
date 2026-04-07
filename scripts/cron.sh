@@ -4,6 +4,7 @@
 #   0,30 * * * * /path/to/scripts/cron.sh ingest
 #   3,33 * * * * /path/to/scripts/cron.sh enrich
 #   8,38 * * * * /path/to/scripts/cron.sh cluster
+#   0,3 * * * * /path/to/scipts/cron.sh purge
 
 APP_URL="https://bs-news-aggregator-web.vercel.app"
 CRON_SECRET="${CRON_SECRET}"
@@ -14,8 +15,8 @@ if [[ -z "$CRON_SECRET" ]]; then
   exit 1
 fi
 
-if [[ "$JOB" != "ingest" && "$JOB" != "enrich" && "$JOB" != "cluster" ]]; then
-  echo "ERROR: Usage: $0 [ingest|enrich|cluster]"
+if [[ "$JOB" != "ingest" && "$JOB" != "enrich" && "$JOB" != "cluster" && "$JOB" != "purge" ]]; then
+  echo "ERROR: Usage: $0 [ingest|enrich|cluster|purge]"
   exit 1
 fi
 
