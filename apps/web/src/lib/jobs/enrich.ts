@@ -64,7 +64,7 @@ export async function runEnrichment(): Promise<EnrichResult> {
       );
     }
 
-    if (vector && vector.length === 1536) {
+    if (vector && vector.length === 512) {
       const vecStr = `[${vector.join(",")}]`;
       await db.query(
         `
