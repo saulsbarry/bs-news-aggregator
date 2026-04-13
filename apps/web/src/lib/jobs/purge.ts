@@ -1,6 +1,6 @@
 import { getDb } from "../pg";
 
-const ARTICLE_RETENTION_DAYS = 14;
+const ARTICLE_RETENTION_DAYS = 7;
 const INGESTION_JOB_RETENTION_DAYS = 7;
 
 export interface PurgeResult {
