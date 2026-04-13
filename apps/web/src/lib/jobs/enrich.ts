@@ -76,6 +76,10 @@ export async function runEnrichment(): Promise<EnrichResult> {
       `,
         [row.id, vecStr, EMBEDDING_MODEL_NAME]
       );
+      await db.query(
+        `UPDATE articles SET raw_content = NULL WHERE id = $1`,
+        [row.id]
+      );
     }
 
     return true;
