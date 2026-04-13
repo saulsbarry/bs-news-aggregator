@@ -61,7 +61,8 @@ export async function embed(text: string): Promise<number[] | null> {
   try {
     const res = await client.embeddings.create({
       model: EMBEDDING_MODEL,
-      input: truncated
+      input: truncated,
+      dimensions: 512,
     });
     const vec = res.data[0]?.embedding;
     return Array.isArray(vec) ? vec : null;

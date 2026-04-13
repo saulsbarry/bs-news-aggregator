@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS cluster_articles (
 -- Embeddings table using pgvector (one per article)
 CREATE TABLE IF NOT EXISTS article_embeddings (
   article_id UUID PRIMARY KEY REFERENCES articles(id) ON DELETE CASCADE,
-  embedding vector(1536) NOT NULL,
+  embedding vector(512) NOT NULL,
   model_name TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
